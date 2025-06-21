@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือปุ๋ยชีวภาพเชิงโต้ตอบ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy & Natural -->
+    <!-- Application Structure Plan: The SPA is structured thematically to guide the user from understanding the 'what' and 'why' to the 'how'. It starts with high-level benefits, clarifies key concepts (liquid vs. dry), then provides an interactive 'How-To Hub' with tabs and selectors for exploring recipes. This task-oriented hub is more engaging than a linear report. It concludes with practical application guides and resources. This structure prioritizes user exploration and task completion (finding a specific recipe) over the original report's linear flow. -->
+    <!-- Visualization & Content Choices: 1. Benefits (Inform) -> Large stat cards (HTML/CSS) for high impact. 2. Ratios (Inform) -> Donut Chart (Chart.js) for the basic recipe's composition. 3. Nutrient/Hormone Data (Compare) -> Interactive Bar Charts (Chart.js) to visually compare levels across different ingredients from Tables 2 & 3, which is more intuitive than reading tables. 4. Processes (Organize) -> Simple flow diagrams (HTML/CSS with Flexbox) for clarity without complex graphics. 5. Fertilizer Formulas (Compare/Organize) -> Interactive dropdown (HTML/JS) to let users select an N-P-K formula and see the corresponding organic recipe, making the information from Table 4 directly actionable. All visualizations are Canvas-based via Chart.js. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#F9F7F3] text-[#4A4A4A]">
+
+    <!-- Header -->
+    <header class="bg-[#6B8E23] text-white p-4 shadow-md sticky top-0 z-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold">🌿 คู่มือปุ๋ยชีวภาพ</h1>
+            <nav>
+                <a href="#intro" class="px-3 py-2 hover:bg-[#8FBC8F] rounded">บทนำ</a>
+                <a href="#recipes" class="px-3 py-2 hover:bg-[#8FBC8F] rounded">สูตรปุ๋ย</a>
+                <a href="#charts" class="px-3 py-2 hover:bg-[#8FBC8F] rounded">เปรียบเทียบข้อมูล</a>
+                <a href="#apply" class="px-3 py-2 hover:bg-[#8FBC8F] rounded">การใช้งาน</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="text-center mb-16 pt-16">
+            <h2 class="text-4xl font-bold text-[#556B2F] mb-4">ปฏิวัติการเกษตรด้วยพลังจากธรรมชาติ</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-700">เรียนรู้วิธีผลิตและใช้ปุ๋ยชีวภาพด้วยตนเองเพื่อลดต้นทุน เพิ่มผลผลิต และฟื้นฟูความอุดมสมบูรณ์ของดินอย่างยั่งยืน</p>
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#4CAF50]">
+                    <h3 class="text-2xl font-bold text-[#4CAF50]">💰 ลดต้นทุน</h3>
+                    <p class="mt-2">ประหยัดค่าปุ๋ยเคมีได้อย่างมหาศาลโดยใช้วัตถุดิบเหลือใช้ในท้องถิ่น</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#DAA520]">
+                    <h3 class="text-2xl font-bold text-[#DAA520]">🌍 ฟื้นฟูดิน</h3>
+                    <p class="mt-2">เพิ่มอินทรียวัตถุ ทำให้ดินร่วนซุย และส่งเสริมสิ่งมีชีวิตในดิน</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#20B2AA]">
+                    <h3 class="text-2xl font-bold text-[#20B2AA]">🌾 เพิ่มผลผลิต</h3>
+                    <p class="mt-2">พืชแข็งแรง ต้านทานโรค ให้ผลผลิตคุณภาพดีและปริมาณสูงขึ้น</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Interactive Recipe Hub -->
+        <section id="recipes" class="mb-16 pt-16">
+            <h2 class="text-3xl font-bold text-center text-[#556B2F] mb-8">ศูนย์รวมสูตรปุ๋ยชีวภาพ</h2>
+            <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+                <div class="p-8">
+                     <!-- Tabs for fertilizer type -->
+                    <div class="flex justify-center border-b mb-6">
+                        <button class="tab-button text-lg font-semibold py-3 px-6 border-b-4 border-transparent hover:border-gray-300 active" onclick="showTab('liquid')">ปุ๋ยน้ำ (น้ำหมัก)</button>
+                        <button class="tab-button text-lg font-semibold py-3 px-6 border-b-4 border-transparent hover:border-gray-300" onclick="showTab('dry')">ปุ๋ยแห้ง (ปุ๋ยหมัก)</button>
+                    </div>
+
+                    <!-- Liquid Fertilizer Content -->
+                    <div id="liquid-content" class="tab-content">
+                        <p class="text-center mb-6">ปุ๋ยน้ำเน้นการให้ธาตุอาหารและฮอร์โมนที่พืชใช้ได้เร็ว เหมาะสำหรับฉีดพ่นทางใบและรดโคนต้น</p>
+                        
+                        <div class="bg-gray-100 rounded-lg p-6">
+                             <h4 class="text-xl font-semibold mb-4">ขั้นตอนการทำพื้นฐาน</h4>
+                             <div class="flex flex-col md:flex-row justify-around items-center space-y-4 md:space-y-0 md:space-x-4">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🔪</div>
+                                    <p>1. หั่นวัตถุดิบ</p>
+                                </div>
+                                <div class="text-green-600 text-2xl font-bold">→</div>
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🍯</div>
+                                    <p>2. ผสมกากน้ำตาล</p>
+                                 </div>
+                                 <div class="text-green-600 text-2xl font-bold">→</div>
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🏺</div>
+                                    <p>3. หมักในถังทึบ</p>
+                                 </div>
+                                 <div class="text-green-600 text-2xl font-bold">→</div>
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">💧</div>
+                                    <p>4. กรองพร้อมใช้</p>
+                                </div>
+                             </div>
+                        </div>
+
+                         <div class="mt-6">
+                            <label for="liquid-recipe-select" class="block text-lg font-medium mb-2">เลือกสูตรน้ำหมัก:</label>
+                            <select id="liquid-recipe-select" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-[#4CAF50] focus:border-[#4CAF50]">
+                                <option value="basic">สูตรพื้นฐาน (จากผลไม้/ผัก)</option>
+                                <option value="egg">สูตรฮอร์โมนไข่</option>
+                                <option value="flower">สูตรเร่งดอก-ผล (น้ำพ่อ)</option>
+                                <option value="leaf">สูตรเร่งใบ-ราก (น้ำแม่)</option>
+                                <option value="pest">สูตรไล่แมลง</option>
+                            </select>
+                        </div>
+                        <div id="liquid-recipe-details" class="mt-4 p-4 border rounded-md bg-green-50 border-green-200 min-h-[150px]">
+                            <!-- JS will populate this -->
+                        </div>
+                    </div>
+
+                    <!-- Dry Fertilizer Content -->
+                    <div id="dry-content" class="tab-content hidden">
+                         <p class="text-center mb-6">ปุ๋ยหมักเน้นการปรับปรุงโครงสร้างดิน เพิ่มอินทรียวัตถุ และปลดปล่อยธาตุอาหารระยะยาว</p>
+                         
+                         <div class="bg-gray-100 rounded-lg p-6">
+                              <h4 class="text-xl font-semibold mb-4">สูตรเทียบเคียงปุ๋ยเคมี</h4>
+                              <p class="mb-4">เลือกสูตรปุ๋ยเคมีเพื่อดูส่วนผสมจากธรรมชาติที่ให้ผลใกล้เคียงกัน แต่ต้นทุนต่ำกว่ามาก</p>
+                              <select id="dry-recipe-select" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-[#DAA520] focus:border-[#DAA520]">
+                                <option value="16-16-16">สูตร 16-16-16 (บำรุงทั่วไป)</option>
+                                <option value="13-13-21">สูตร 13-13-21 (เร่งหวาน/เพิ่มขนาดผล)</option>
+                                <option value="16-20-0">สูตร 16-20-0 (เร่งการเจริญเติบโต)</option>
+                            </select>
+                            <div id="dry-recipe-details" class="mt-4 p-4 border rounded-md bg-yellow-50 border-yellow-200 min-h-[100px]">
+                                <!-- JS will populate this -->
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Interactive Charts -->
+        <section id="charts" class="mb-16 pt-16">
+             <h2 class="text-3xl font-bold text-center text-[#556B2F] mb-8">สำรวจข้อมูลเชิงเปรียบเทียบ</h2>
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-xl">
+                    <h3 class="text-xl font-semibold text-center mb-4">เปรียบเทียบธาตุอาหารหลัก (N-P-K)</h3>
+                    <div class="chart-container">
+                        <canvas id="nutrientChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-4 text-center">เลือกวัตถุดิบให้เหมาะกับความต้องการของพืชในแต่ละระยะ</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-xl">
+                    <h3 class="text-xl font-semibold text-center mb-4">เปรียบเทียบฮอร์โมนพืช</h3>
+                    <div class="chart-container">
+                        <canvas id="hormoneChart"></canvas>
+                    </div>
+                     <p class="text-sm text-gray-600 mt-4 text-center">ควบคุมการเติบโตของพืชตามธรรมชาติด้วยฮอร์โมนที่เหมาะสม</p>
+                </div>
+             </div>
+        </section>
+
+         <!-- Section 4: Application Guide -->
+        <section id="apply" class="mb-16 pt-16">
+             <h2 class="text-3xl font-bold text-center text-[#556B2F] mb-8">คู่มือการนำไปใช้</h2>
+             <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-2xl">
+                <h3 class="text-2xl font-semibold mb-4">อัตราส่วนการใช้ปุ๋ยน้ำชีวภาพ</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 font-semibold">วัตถุประสงค์</th>
+                                <th class="p-3 font-semibold">อัตราส่วน (น้ำหมัก:น้ำ)</th>
+                                <th class="p-3 font-semibold">วิธีการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b"><td class="p-3">บำรุงพืชใบอ่อน/ผัก</td><td class="p-3 font-mono">1:500</td><td class="p-3">ฉีดพ่นทางใบ</td></tr>
+                            <tr class="border-b bg-green-50"><td class="p-3">บำรุงไม้ผล/ไม้ใบหนา</td><td class="p-3 font-mono">1:200</td><td class="p-3">รดโคนต้น/ฉีดพ่น</td></tr>
+                            <tr class="border-b"><td class="p-3">กำจัดวัชพืช</td><td class="p-3 font-mono">1:10 (+เกลือ)</td><td class="p-3">ฉีดพ่นโดยตรง</td></tr>
+                            <tr class="bg-green-50"><td class="p-3">ดับกลิ่นคอกสัตว์</td><td class="p-3 font-mono">1:100</td><td class="p-3">ราด/ฉีดพ่น</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-2xl font-semibold mt-8 mb-4">อัตราการใช้ปุ๋ยแห้ง</h3>
+                 <p>การใช้ปุ๋ยแห้งจะแตกต่างกันไปตามชนิดของพืช เช่น **นาข้าว** ใช้ 100 กก./ไร่ ตอนเตรียมดิน, **ไม้ผล** ใช้ 1-3 กก./ต้น รองก้นหลุมหรือหว่านรอบทรงพุ่ม, **พืชผัก** ใช้ 1 กก./ตร.ม. ตอนเตรียมแปลง</p>
+             </div>
+        </section>
+
+         <!-- Section 5: AI-Powered Tools -->
+        <section id="ai-tools" class="mb-16 pt-16">
+            <h2 class="text-3xl font-bold text-center text-[#556B2F] mb-8">เครื่องมืออัจฉริยะจาก Gemini AI</h2>
+            <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Feature 1: Recipe Suggestion -->
+                <div>
+                    <h3 class="text-xl font-semibold text-[#6B8E23] mb-4">✨ แนะนำสูตรน้ำหมักตามวัตถุดิบ</h3>
+                    <p class="text-gray-700 mb-4">ระบุวัตถุดิบที่คุณมี (เช่น เศษผัก ผลไม้ ปลา หอยเชอรี่ กากน้ำตาล) เพื่อรับคำแนะนำสูตรน้ำหมักชีวภาพที่เหมาะสม</p>
+                    <textarea id="ingredientsInput" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B8E23] mb-4" rows="4" placeholder="เช่น กล้วย, มะละกอ, เศษผักบุ้ง, กากน้ำตาล, ปลา, น้ำสะอาด"></textarea>
+                    <button id="getRecipeBtn" class="w-full py-3 px-6 rounded-md text-white font-semibold bg-[#6B8E23] hover:bg-[#556B2F] transition-colors flex items-center justify-center">
+                        รับคำแนะนำสูตร ✨
+                        <span id="recipeLoadingSpinner" class="loading-spinner hidden"></span>
+                    </button>
+                    <div id="recipeOutput" class="mt-4 p-4 bg-green-50 rounded-md text-green-900 border border-green-200 hidden"></div>
+                </div>
+
+                <!-- Feature 2: Troubleshooting -->
+                <div>
+                    <h3 class="text-xl font-semibold text-[#DAA520] mb-4">✨ ปรึกษาปัญหาการหมักปุ๋ย</h3>
+                    <p class="text-gray-700 mb-4">อธิบายปัญหาที่คุณพบในการหมักปุ๋ย (เช่น มีกลิ่นเหม็น ไม่เกิดฟอง มีราขึ้น) เพื่อรับคำแนะนำในการแก้ไข</p>
+                    <textarea id="troubleInput" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DAA520] mb-4" rows="4" placeholder="เช่น น้ำหมักมีกลิ่นเหม็นเปรี้ยวมาก มีเมือกสีขาวลอยอยู่ด้านบน"></textarea>
+                    <button id="getTroubleshootBtn" class="w-full py-3 px-6 rounded-md text-white font-semibold bg-[#DAA520] hover:bg-[#B8860B] transition-colors flex items-center justify-center">
+                        ปรึกษาปัญหา ✨
+                        <span id="troubleLoadingSpinner" class="loading-spinner hidden"></span>
+                    </button>
+                    <div id="troubleOutput" class="mt-4 p-4 bg-yellow-50 rounded-md text-yellow-900 border border-yellow-200 hidden"></div>
+                </div>
+            </div>
+        </section>
+
+         <!-- Section 6: Resources -->
+        <section id="resources" class="text-center bg-gradient-to-r from-[#8FBC8F] to-[#6B8E23] text-white py-12 rounded-lg">
+            <h2 class="text-3xl font-bold mb-4">แหล่งทรัพยากรเพิ่มเติม</h2>
+            <p class="max-w-2xl mx-auto mb-6">เกษตรกรสามารถติดต่อขอรับหัวเชื้อจุลินทรีย์ พด. ชนิดต่างๆ ฟรี! เพื่อเพิ่มประสิทธิภาพในการทำปุ๋ยชีวภาพได้ที่สถานีพัฒนาที่ดินทุกจังหวัด หรือสำนักงานพัฒนาที่ดินเขตทั่วประเทศ</p>
+            <a href="https://www.ldd.go.th/" target="_blank" class="bg-white text-[#556B2F] font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">ติดต่อกรมพัฒนาที่ดิน</a>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 text-gray-500 text-sm mt-8">
+        <p>สร้างสรรค์ข้อมูลเพื่อเกษตรกรไทย | พัฒนาโดยใช้ข้อมูลจากเอกสารเผยแพร่ความรู้</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const liquidRecipeData = {
+            basic: {
+                title: 'สูตรพื้นฐาน (จากผลไม้/ผัก)',
+                desc: 'เหมาะสำหรับบำรุงพืชทั่วไป ทำง่าย ใช้วัตถุดิบหลากหลาย',
+                ingredients: ['ผลไม้/ผักสด: 3 ส่วน', 'กากน้ำตาล: 1 ส่วน', 'น้ำสะอาด: 10 ส่วน', 'หัวเชื้อจุลินทรีย์ (ถ้ามี)']
+            },
+            egg: {
+                title: 'สูตรฮอร์โมนไข่',
+                desc: 'ช่วยบำรุงพืชได้อย่างมีประสิทธิภาพ โดยเฉพาะช่วงติดดอกออกผล',
+                ingredients: ['ไข่ไก่: 1 กก.', 'หัวเชื้อจุลินทรีย์เหง้ากล้วย: 1 ลิตร', 'กากน้ำตาล: 1 ลิตร', 'น้ำมะพร้าวอ่อน: 2 ลูก', 'ลูกแป้ง: 1 ลูก']
+            },
+            flower: {
+                title: 'สูตรเร่งดอก-ผล (น้ำพ่อ)',
+                desc: 'อุดมด้วยฮอร์โมนจิบเบอร์เรลลิน ช่วยกระตุ้นการออกดอกและพัฒนาผล',
+                ingredients: ['ฟักทอง: 1 กก.', 'มะละกอสุก: 1 กก.', 'กล้วยน้ำว้า: 1 กก.', 'กากน้ำตาล: 1 กก.', 'น้ำ: 10 ลิตร']
+            },
+            leaf: {
+                title: 'สูตรเร่งใบ-กิ่ง-ราก (น้ำแม่)',
+                desc: 'อุดมด้วยฮอร์โมนออกซินและไซโตไคนิน ช่วยบำรุงใบ กิ่ง และราก',
+                ingredients: ['พืชสีเขียว (ผัก, หญ้า, ถั่ว): 3 กก.', 'กากน้ำตาล: 1 กก.', 'น้ำ: 10 ลิตร']
+            },
+            pest: {
+                title: 'สูตรไล่แมลง',
+                desc: 'ใช้สมุนไพรที่มีกลิ่นฉุนหรือรสขมเพื่อป้องกันและขับไล่แมลงศัตรูพืช',
+                ingredients: ['สมุนไพร (เช่น สะเดา, ข่า, ตะไคร้หอม): 3 ส่วน', 'กากน้ำตาล: 1 ส่วน', 'น้ำ: 10 ส่วน', 'เหล้าขาว/น้ำส้มสายชู (ถ้าต้องการประสิทธิภาพสูงขึ้น)']
+            }
+        };
+
+        const dryRecipeData = {
+            '16-16-16': {
+                desc: 'สูตรบำรุงทั่วไป ใช้ได้กับพืชทุกชนิด ทุกระยะการเจริญเติบโต',
+                ratio: 'รำอ่อน : ดินดี : แกลบดิบ : แกลบดำ : มูลสัตว์ : พืชตระกูลถั่ว',
+                parts: '1 : 1 : 1 : 1 : 1 : 1'
+            },
+            '13-13-21': {
+                desc: 'สูตรเร่งความหวาน เพิ่มขนาดผล เหมาะสำหรับไม้ผลช่วงใกล้เก็บเกี่ยว',
+                ratio: '(แกลบดิบ, แกลบดำ, มูลสัตว์, พืชตระกูลถั่ว) ใช้อัตราส่วน 2 เท่าของส่วนผสมอื่น',
+                parts: 'วัสดุ K สูง : อื่นๆ = 2 : 1'
+            },
+            '16-20-0': {
+                desc: 'สูตรเร่งการเจริญเติบโตและบำรุงราก เหมาะสำหรับพืชช่วงแรกปลูก',
+                ratio: '(ดิน, แกลบ, มูลสัตว์, พืชตระกูลถั่ว) ใช้อัตราส่วน 2-4 เท่าของรำอ่อน',
+                parts: 'วัสดุ P สูง : อื่นๆ = 4 : 1'
+            }
+        };
+        
+        const liquidRecipeSelect = document.getElementById('liquid-recipe-select');
+        const liquidRecipeDetails = document.getElementById('liquid-recipe-details');
+        const dryRecipeSelect = document.getElementById('dry-recipe-select');
+        const dryRecipeDetails = document.getElementById('dry-recipe-details');
+
+        function updateLiquidRecipe() {
+            const selected = liquidRecipeSelect.value;
+            const data = liquidRecipeData[selected];
+            liquidRecipeDetails.innerHTML = `
+                <h4 class="text-lg font-semibold text-green-800">${data.title}</h4>
+                <p class="text-green-700 mb-2">${data.desc}</p>
+                <ul class="list-disc list-inside text-green-900">
+                    ${data.ingredients.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+        }
+        
+        function updateDryRecipe() {
+            const selected = dryRecipeSelect.value;
+            const data = dryRecipeData[selected];
+            dryRecipeDetails.innerHTML = `
+                <h4 class="text-lg font-semibold text-yellow-800">${data.desc}</h4>
+                <p class="text-yellow-700 mt-2"><strong>อัตราส่วนผสม:</strong> ${data.ratio}</p>
+                <p class="text-yellow-700"><strong>สัดส่วน:</strong> ${data.parts}</p>
+            `;
+        }
+
+        liquidRecipeSelect.addEventListener('change', updateLiquidRecipe);
+        dryRecipeSelect.addEventListener('change', updateDryRecipe);
+        
+        updateLiquidRecipe();
+        updateDryRecipe();
+
+        window.showTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`${tabName}-content`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
+        };
+
+        const chartDefaultOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: "'Kanit', sans-serif" } } },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            return Array.isArray(label) ? label.join(' ') : label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { font: { family: "'Kanit', sans-serif" } } },
+                y: { ticks: { font: { family: "'Kanit', sans-serif" } }, beginAtZero: true }
+            }
+        };
+
+        const nutrientCtx = document.getElementById('nutrientChart').getContext('2d');
+        new Chart(nutrientCtx, {
+            type: 'bar',
+            data: {
+                labels: ['ปลา', 'ผัก', 'ผลไม้รวม', 'หอยเชอรี่'],
+                datasets: [
+                    { label: 'N (%)', data: [0.98, 0.14, 0.27, 0.35], backgroundColor: '#8FBC8F' },
+                    { label: 'P (%)', data: [1.12, 0.30, 0.05, 0.25], backgroundColor: '#6B8E23' },
+                    { label: 'K (%)', data: [1.03, 0.40, 0.67, 0.85], backgroundColor: '#556B2F' }
+                ]
+            },
+            options: chartDefaultOptions
+        });
+
+        const hormoneCtx = document.getElementById('hormoneChart').getContext('2d');
+        new Chart(hormoneCtx, {
+            type: 'bar',
+            data: {
+                labels: ['ปลา/หอย', 'ผลไม้', 'ผักรวม'],
+                datasets: [
+                    { label: 'ออกซิน (เร่งราก)', data: [4.01, 0.27, 1.41], backgroundColor: '#F0E68C' },
+                    { label: 'จิบเบอร์เรลลิน (เร่งดอก/ผล)', data: [33.07, 28.93, 1.20], backgroundColor: '#DAA520' },
+                    { label: 'ไซโตไคนิน (เร่งใบ)', data: [3.05, 11.28, 12.01], backgroundColor: '#B8860B' }
+                ]
+            },
+            options: {
+                ...chartDefaultOptions,
+                 scales: {
+                    ...chartDefaultOptions.scales,
+                    y: { ...chartDefaultOptions.scales.y, title: { display: true, text: 'ปริมาณ (mg/ml)' } }
+                }
+            }
+        });
+
+        const getRecipeBtn = document.getElementById('getRecipeBtn');
+        const ingredientsInput = document.getElementById('ingredientsInput');
+        const recipeOutput = document.getElementById('recipeOutput');
+        const recipeLoadingSpinner = document.getElementById('recipeLoadingSpinner');
+
+        getRecipeBtn.addEventListener('click', async () => {
+            const ingredients = ingredientsInput.value;
+            recipeOutput.innerHTML = '';
+            recipeOutput.classList.add('hidden');
+            recipeLoadingSpinner.classList.remove('hidden');
+
+            if (!ingredients.trim()) {
+                recipeOutput.innerHTML = '<p class="text-red-500">กรุณาระบุวัตถุดิบที่คุณมี</p>';
+                recipeOutput.classList.remove('hidden');
+                recipeLoadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: `ผู้ใช้มีวัตถุดิบดังต่อไปนี้: ${ingredients} โปรดแนะนำสูตรน้ำหมักชีวภาพ 1-2 สูตรที่เหมาะสม พร้อมอัตราส่วนโดยประมาณ และประโยชน์ของแต่ละสูตรสำหรับพืชชนิดต่างๆ โดยให้ข้อมูลกระชับ เข้าใจง่าย เหมาะสำหรับเกษตรกรไทย` }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyD-AQ-1RhSL4r7Oal20wF4n6qkeXAfnpm8";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    recipeOutput.innerHTML = `<p>${text}</p>`;
+                } else {
+                    recipeOutput.innerHTML = '<p class="text-red-500">ขออภัย ไม่สามารถสร้างคำแนะนำได้ในขณะนี้ โปรดลองอีกครั้ง</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching recipe:', error);
+                recipeOutput.innerHTML = '<p class="text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.message + '</p>';
+            } finally {
+                recipeLoadingSpinner.classList.add('hidden');
+                recipeOutput.classList.remove('hidden');
+            }
+        });
+
+        const getTroubleshootBtn = document.getElementById('getTroubleshootBtn');
+        const troubleInput = document.getElementById('troubleInput');
+        const troubleOutput = document.getElementById('troubleOutput');
+        const troubleLoadingSpinner = document.getElementById('troubleLoadingSpinner');
+
+        getTroubleshootBtn.addEventListener('click', async () => {
+            const problem = troubleInput.value;
+            troubleOutput.innerHTML = '';
+            troubleOutput.classList.add('hidden');
+            troubleLoadingSpinner.classList.remove('hidden');
+
+            if (!problem.trim()) {
+                troubleOutput.innerHTML = '<p class="text-red-500">กรุณาอธิบายปัญหาที่คุณพบ</p>';
+                troubleOutput.classList.remove('hidden');
+                troubleLoadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: `เกษตรกรกำลังประสบปัญหาในการหมักปุ๋ยชีวภาพดังนี้: ${problem} โปรดวิเคราะห์ปัญหาและให้คำแนะนำวิธีแก้ไขอย่างน้อย 2-3 ข้อที่เป็นประโยชน์และทำตามได้ง่าย สำหรับเกษตรกรไทย` }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyD-AQ-1RhSL4r7Oal20wF4n6qkeXAfnpm8";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    troubleOutput.innerHTML = `<p>${text}</p>`;
+                } else {
+                    troubleOutput.innerHTML = '<p class="text-red-500">ขออภัย ไม่สามารถให้คำแนะนำได้ในขณะนี้ โปรดลองอีกครั้ง</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching troubleshoot advice:', error);
+                troubleOutput.innerHTML = '<p class="text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.message + '</p>';
+            } finally {
+                troubleLoadingSpinner.classList.add('hidden');
+                troubleOutput.classList.remove('hidden');
+            }
+        });
+    });
+    </script>
+</body>
+</html>
+
+
